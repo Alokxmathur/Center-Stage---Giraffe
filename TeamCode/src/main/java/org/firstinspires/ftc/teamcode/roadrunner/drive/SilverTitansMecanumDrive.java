@@ -37,6 +37,7 @@ import org.firstinspires.ftc.teamcode.robot.RobotConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
@@ -98,11 +99,12 @@ public class SilverTitansMecanumDrive extends MecanumDrive {
 
         imu = hardwareMap.get(IMU.class, "imu");
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, RevHubOrientationOnRobot.UsbFacingDirection.UP
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD
         ));
         imu.initialize(parameters);
         imu.resetYaw();
-        Match.log("Initialized IMU to yaw of " + imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES));
+        Match.log(String.format(Locale.getDefault(), "Initialized IMU to yaw of %.2f",
+                imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
 
         leftFront = hardwareMap.get(DcMotorEx.class, RobotConfig.LEFT_FRONT_DRIVE);
         leftRear = hardwareMap.get(DcMotorEx.class, RobotConfig.LEFT_REAR_DRIVE);
@@ -315,6 +317,8 @@ public class SilverTitansMecanumDrive extends MecanumDrive {
     }
 
     public void ensureWheelDirection() {
+        rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
         leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
         leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
     }

@@ -1,12 +1,11 @@
 package org.firstinspires.ftc.teamcode.robot.components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.game.Match;
 import org.firstinspires.ftc.teamcode.robot.RobotConfig;
 import org.firstinspires.ftc.teamcode.robot.operations.ArmOperation;
 
@@ -16,52 +15,55 @@ public class Arm {
     public static final int CORE_HEX_MOTOR_COUNT_PER_REV = 288;
     public static final int INOUT_GEAR_RATIO = 3;
 
-    DcMotor shoulder, elbow, inOutMotor;
-    Servo rotator, wrist;
-    DigitalChannel shoulderLimitSwitch, elbowLimitSwitch;
+    DcMotorEx shoulder, slide, inOutMotor, wrist;
+    DigitalChannel shoulderLimitSwitch, slideLimitSwitch;
     boolean shoulderRetained,
-            elbowRetained,
-            shoulderReset,
-            elbowReset,
-            intakeReset,
+            slideRetained,
+            wristRetained,
+            shoulderReset = true,
+            slideReset,
             shoulderLowered,
-            elbowLowered;
+            slideLowered;
 
     public Arm(HardwareMap hardwareMap) {
         //the shoulder limit switch
         this.shoulderLimitSwitch = hardwareMap.get(DigitalChannel.class, RobotConfig.SHOULDER_LIMIT_SWITCH);
-        //the elbow limit switch
+        //the slide limit switch
         //initialize our shoulder motor
-        this.shoulder = hardwareMap.get(DcMotor.class, RobotConfig.SHOULDER);
+        this.shoulder = hardwareMap.get(DcMotorEx.class, RobotConfig.SHOULDER);
         this.shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        this.elbowLimitSwitch = hardwareMap.get(DigitalChannel.class, RobotConfig.ELBOW_LIMIT_SWITCH);
-        //initialize our elbow motor
-        this.elbow = hardwareMap.get(DcMotor.class, RobotConfig.ELBOW);
-        this.elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        this.elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.slideLimitSwitch = hardwareMap.get(DigitalChannel.class, RobotConfig.SLIDE_LIMIT_SWITCH);
+        //initialize our slide motor
+        this.slide = hardwareMap.get(DcMotorEx.class, RobotConfig.SLIDE);
+        this.slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //initialize our intake motor
-        this.inOutMotor = hardwareMap.get(DcMotor.class, RobotConfig.INOUT_MOTOR);
+        this.inOutMotor = hardwareMap.get(DcMotorEx.class, RobotConfig.INOUT_MOTOR);
         this.inOutMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         this.inOutMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.inOutMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        //and the rotator
-        this.rotator = hardwareMap.get(Servo.class, RobotConfig.ROTATOR);
-        //and the bucket
-        this.wrist = hardwareMap.get(Servo.class, RobotConfig.BUCKET);
+        //initialize our wrist motor
+        this.wrist = hardwareMap.get(DcMotorEx.class, RobotConfig.WRIST);
+        this.wrist.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         ensureMotorDirections();
         assumeInitialPosition();
     }
 
     public boolean resetArm() {
-        if (!elbowReset) {
-            //retainShoulder();
-            //initialize elbow (lower and then raise) unless that's already done
-            lowerThenRaiseElbow();
+        return true;
+        /*
+        if (!slideReset) {
+            //initialize slide (lower and then raise) unless that's already done
+            lowerThenRaiseSlide();
             return false;
         }
         else if (!shoulderReset) {
@@ -75,6 +77,8 @@ public class Arm {
             return false;
         }
         return true;
+
+         */
     }
 
     private boolean lowerThenRaiseShoulder() {
@@ -104,38 +108,38 @@ public class Arm {
         }
         return true;
     }
-    private boolean lowerThenRaiseElbow() {
-        //if the elbow limit switch has not yet been pressed
-        if (!elbowLowered) {
-            //find the state of the elbow limit switch: true means it is pressed
-            if (!(elbowLowered = elbowLimitSwitch.getState()))
+    private boolean lowerThenRaiseSlide() {
+        //if the slide limit switch has not yet been pressed
+        if (!slideLowered) {
+            //find the state of the slide limit switch: true means it is pressed
+            if (!(slideLowered = slideLimitSwitch.getState()))
             {
-                setElbowPower(.4);
+                setSlidePower(.4);
             }
             else {
 
-                setElbowPower(0);
+                setSlidePower(0);
             }
             return false;
         }
-        else if (!elbowReset) {
-            //if the elbow had been lowered but not raised since,
+        else if (!slideReset) {
+            //if the slide had been lowered but not raised since,
             //find if the limit switch has been raised since it was pressed
-            if (!(elbowReset = !elbowLimitSwitch.getState())) {
-                setElbowPower(-.1);
+            if (!(slideReset = !slideLimitSwitch.getState())) {
+                setSlidePower(-.1);
                 return false;
             }
             else {
                 //the limit switch is now not pressed, we are done. reset encoder and return true
-                this.elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                this.slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 return true;
             }
         }
-        return elbowReset;
+        return slideReset;
     }
 
     public void ensureMotorDirections() {
-        this.elbow.setDirection(DcMotorSimple.Direction.FORWARD);
+        this.slide.setDirection(DcMotorSimple.Direction.FORWARD);
         this.shoulder.setDirection(DcMotorSimple.Direction.FORWARD);
         this.inOutMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
@@ -144,35 +148,22 @@ public class Arm {
         setPositions(RobotConfig.ARM_STARTING_POSITION);
     }
 
-    public void raiseBucketIncrementally() {
-        this.wrist.setPosition(wrist.getPosition() - RobotConfig.SERVO_INCREMENT);
+    public void raiseWristIncrementally() {
+        setWristPosition(wrist.getCurrentPosition() - 5);
     }
 
-    public void lowerBucketIncrementally() {
-        this.wrist.setPosition(wrist.getPosition() + RobotConfig.SERVO_INCREMENT);
+    public void lowerWristIncrementally() {
+        setWristPosition(wrist.getCurrentPosition() + 5);
     }
 
     public void intakePositionWrist() {
-        this.wrist.setPosition(RobotConfig.WRIST_INTAKE_POSITION);
+        setWristPosition(RobotConfig.WRIST_INTAKE_POSITION);
     }
 
     public void dumpPositionWrist() {
-        this.wrist.setPosition(RobotConfig.WRIST_DUMP_POSITION);
-    }
-    public void forwardRotator() {
-        this.rotator.setPosition(RobotConfig.ROTATOR_STARTING_POSITION);
-    }
-    public void backwardRotator() {
-        this.rotator.setPosition(RobotConfig.ROTATOR_TURNED_OVER_POSITION);
+        setWristPosition(RobotConfig.WRIST_DUMP_POSITION);
     }
 
-    public void backwardRotatorIncrementally() {
-        this.rotator.setPosition(rotator.getPosition() + RobotConfig.SERVO_INCREMENT);
-    }
-
-    public void forwardRotatorIncrementally() {
-        this.rotator.setPosition(rotator.getPosition() - RobotConfig.SERVO_INCREMENT);
-    }
 
     public void stop() {
     }
@@ -231,10 +222,9 @@ public class Arm {
     }
 
     private void setPositions(ArmPosition armPosition) {
-        setElbowPosition(armPosition.getElbow());
+        setSlidePosition(armPosition.getSlide());
         setShoulderPosition(armPosition.getShoulder());
-        rotator.setPosition(armPosition.getRotator());
-        wrist.setPosition(armPosition.getWrist());
+        setWristPosition(armPosition.getWrist());
     }
 
     /**
@@ -268,33 +258,63 @@ public class Arm {
     }
 
     /**
-     * Set the elbow position
+     * Set the slide position
      * @param position
      */
-    public void setElbowPosition(int position) {
-        this.elbow.setTargetPosition(position);
-        this.elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.elbow.setPower(RobotConfig.MAX_ELBOW_POWER);
+    public void setSlidePosition(int position) {
+        this.slide.setTargetPosition(position);
+        this.slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.slide.setPower(RobotConfig.MAX_SLIDE_POWER);
     }
 
     /**
-     * Retain elbow in its current position
+     * Retain slide in its current position
      */
-    public void retainElbow() {
-        if (!elbowRetained) {
-            setElbowPosition(elbow.getCurrentPosition());
-            elbowRetained = true;
+    public void retainSlide() {
+        if (!slideRetained) {
+            setSlidePosition(slide.getCurrentPosition());
+            slideRetained = true;
         }
     }
 
     /**
-     * Set the elbow power
+     * Set the slide power
      * @param power
      */
-    public void setElbowPower(double power) {
-        this.elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.elbow.setPower(power);
-        elbowRetained = false;
+    public void setSlidePower(double power) {
+        this.slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.slide.setPower(power);
+        slideRetained = false;
+    }
+
+    /**
+     * Set the wrist motor position
+     * @param position
+     */
+    public void setWristPosition(int position) {
+        this.wrist.setTargetPosition(position);
+        this.wrist.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.wrist.setPower(RobotConfig.MAX_SHOULDER_POWER);
+    }
+
+    /**
+     * Retain shoulder in its current position
+     */
+    public void retainWrist() {
+        if (!wristRetained) {
+            setWristPosition(wrist.getCurrentPosition());
+            wristRetained = true;
+        }
+    }
+
+    /**
+     * Set the shoulder power
+     * @param power
+     */
+    public void setWristPower(double power) {
+        this.wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.wrist.setPower(power*RobotConfig.MAX_WRIST_POWER);
+        wristRetained = false;
     }
 
     /**
@@ -307,19 +327,23 @@ public class Arm {
     }
 
     /**
-     * Returns true if elbow and shoulder are within range
+     * Returns true if slide and shoulder are within range
      * @return
      */
     public boolean isWithinRange() {
-        return shoulderIsWithinRange() && elbowIsWithinRange();
+        return shoulderIsWithinRange() && slideIsWithinRange();
     }
 
     private boolean shoulderIsWithinRange() {
         return Math.abs(shoulder.getTargetPosition() - shoulder.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_SHOULDER_ERROR;
     }
 
-    private boolean elbowIsWithinRange() {
-        return Math.abs(elbow.getTargetPosition() - elbow.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_ELBOW_ERROR;
+    private boolean slideIsWithinRange() {
+        return Math.abs(slide.getTargetPosition() - slide.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_SLIDE_ERROR;
+    }
+
+    private boolean wristIsWithinRange() {
+        return Math.abs(wrist.getTargetPosition() - wrist.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_WRIST_ERROR;
     }
 
     public void eat() {
@@ -346,7 +370,7 @@ public class Arm {
     /**
      * Returns the status of the arm
      * Reports the current position, target position and power of the shoulder,
-     * current position, target position and power of the elbow,
+     * current position, target position and power of the slide,
      * the in-out motor's speed
      * the position of the wrist and the position of the sorter
      * the state of the shoulder limit switch
@@ -354,17 +378,16 @@ public class Arm {
      */
     public String getStatus() {
         String shoulderInit = shoulderReset ? "Shoulder initialized" : "Shoulder initializing";
-        String elbowInit = elbowReset ? "Elbow initialized" : "Elbow initializing";
-        String intakeInit = elbowReset ? "Intake initialized" : "Intake initializing";
+        String slideInit = slideReset ? "Slide initialized" : "Slide initializing";
+        String intakeInit = slideReset ? "Intake initialized" : "Intake initializing";
 
 
         return String.format(Locale.getDefault(),
-                "Sh:%d->%d@%.2f, El:%d->%d@%.2f, In:%d->%d@%.2f (%s), R:%.3f, W:%.3f, %s, %s, %s",
+                "Sh:%d->%d@%.2f, Slide:%d->%d@%.2f, Wrist:%d->%d@%.2f, In:%d->%d@%.2f",
                 shoulder.getCurrentPosition(), shoulder.getTargetPosition(), shoulder.getPower(),
-                elbow.getCurrentPosition(), elbow.getTargetPosition(), elbow.getPower(),
-                inOutMotor.getCurrentPosition(), inOutMotor.getTargetPosition(), inOutMotor.getPower(), inOutMotor.getMode(),
-                rotator.getPosition(), wrist.getPosition(),
-                shoulderInit, elbowInit, intakeInit);
+                slide.getCurrentPosition(), slide.getTargetPosition(), slide.getPower(),
+                wrist.getCurrentPosition(), wrist.getTargetPosition(), wrist.getPower(),
+                inOutMotor.getCurrentPosition(), inOutMotor.getTargetPosition(), inOutMotor.getPower());
     }
 
     public boolean intakeWithinRange() {

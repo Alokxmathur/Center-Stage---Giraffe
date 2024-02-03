@@ -33,27 +33,6 @@ public class DriveTrain extends SilverTitansMecanumDrive {
     public static final double     P_TURN_COEFFICIENT            = 1;     // Larger is more responsive, but also less stable
     public static final double P_DRIVE_COEFFICIENT = 0.0125 * Math.PI;     // Larger is more responsive, but also less stable
 
-    int lastLeftFrontEncoderValue;
-    int lastLeftRearEncoderValue;
-    int lastRightFrontEncoderValue;
-    int lastRightRearEncoderValue;
-
-    public int getLastLeftFrontEncoderValue() {
-        return lastLeftFrontEncoderValue;
-    }
-
-    public int getLastLeftRearEncoderValue() {
-        return lastLeftRearEncoderValue;
-    }
-
-    public int getLastRightFrontEncoderValue() {
-        return lastRightFrontEncoderValue;
-    }
-
-    public int getLastRightRearEncoderValue() {
-        return lastRightRearEncoderValue;
-    }
-
 
     public DriveTrain(HardwareMap hardwareMap) {
         super(hardwareMap);
@@ -365,10 +344,6 @@ public class DriveTrain extends SilverTitansMecanumDrive {
     }
 
     public void stop() {
-        lastLeftFrontEncoderValue = leftFront.getCurrentPosition();
-        lastLeftRearEncoderValue = leftRear.getCurrentPosition();
-        lastRightFrontEncoderValue = rightFront.getCurrentPosition();
-        lastRightRearEncoderValue = rightRear.getCurrentPosition();
         //Stop our motors
         leftFront.setPower(0);
         rightFront.setPower(0);

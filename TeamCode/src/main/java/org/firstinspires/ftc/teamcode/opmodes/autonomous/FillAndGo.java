@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name="Fill&Go", group="Phoebe")
+@com.qualcomm.robotcore.eventloop.opmode.Autonomous(name="Fill&Go", group="Aliyah")
 @Disabled
 public class FillAndGo extends LinearOpMode {
 

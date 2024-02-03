@@ -55,7 +55,7 @@ import java.util.Date;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name = "Phoebe: Driver Controlled", group = "Phoebe")
+@TeleOp(name = "Aliyah: Driver Controlled", group = "Aliyah")
 //@Disabled
 public class DriverControlledOperation extends OpMode {
 

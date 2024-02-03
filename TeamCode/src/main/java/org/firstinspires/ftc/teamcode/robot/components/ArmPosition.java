@@ -5,24 +5,19 @@ public class ArmPosition {
         return shoulder;
     }
 
-    public int getElbow() {
-        return elbow;
+    public int getSlide() {
+        return slide;
     }
 
-    int shoulder, elbow;
-    double rotator, wrist;
+    int shoulder, slide, wrist;
 
-    public ArmPosition(int shoulder, int elbow, double rotator, double wrist) {
+    public ArmPosition(int shoulder, int slide, int wrist) {
         this.shoulder = shoulder;
-        this.elbow = elbow;
-        this.rotator = rotator;
+        this.slide = slide;
         this.wrist = wrist;
     }
 
-    public double getRotator() {
-        return rotator;
-    }
-    public double getWrist() {
+    public int getWrist() {
         return wrist;
     }
 }

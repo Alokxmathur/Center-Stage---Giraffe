@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.game.Match;
 import org.firstinspires.ftc.teamcode.robot.components.Arm;
 import org.firstinspires.ftc.teamcode.robot.components.DroneLauncher;
 import org.firstinspires.ftc.teamcode.robot.components.LED;
-import org.firstinspires.ftc.teamcode.robot.components.MiniArm;
 import org.firstinspires.ftc.teamcode.robot.components.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.robot.components.vision.SilverTitansVisionPortal;
 import org.firstinspires.ftc.teamcode.robot.operations.ArmOperation;
@@ -89,7 +88,6 @@ public class Robot {
     LED led;
     Arm arm;
     DroneLauncher droneLauncher;
-    MiniArm miniArm;
     SilverTitansVisionPortal visionPortal;
 
     boolean armInitialized;
@@ -126,7 +124,6 @@ public class Robot {
         this.droneLauncher = new DroneLauncher(hardwareMap);
 
         this.arm = new Arm(hardwareMap);
-        this.miniArm = new MiniArm(hardwareMap);
 
         telemetry.addData("Status", "Creating operations thread, please wait");
         telemetry.update();
@@ -319,33 +316,7 @@ public class Robot {
      * @param gamePad2 - game pad 2
      */
     public void handleArm(Gamepad gamePad1, Gamepad gamePad2) {
-        /*
-            gamePad 1 dpad up/down move rotator incrementally
-        */
-        if (gamePad1.dpad_up) {
-            arm.backwardRotatorIncrementally();
-        } else if (gamePad1.dpad_down) {
-            arm.forwardRotatorIncrementally();
-        }
-        /*
-            gamePad 1 dpad left/right move rotator backward/forward
-        */
-        else if (gamePad1.dpad_left) {
-            arm.backwardRotator();
-        }
-        else if (gamePad1.dpad_right) {
-            arm.forwardRotator();
-        }
 
-        /*
-            gamePad 2 dpad left/right manage bucket / sorter
-        */
-        if (gamePad2.dpad_left) {
-            arm.intakePositionWrist();
-        }
-        if (gamePad2.dpad_right) {
-            arm.dumpPositionWrist();
-        }
         //If both gamePad2 left and right trigger are pressed, stop inout motor
         if (gamePad2.left_trigger > .2 && gamePad2.right_trigger > .2) {
             arm.abstain();
@@ -358,20 +329,7 @@ public class Robot {
         else if (gamePad2.right_trigger > .2) {
             arm.expel();
         }
-        if (gamePad1.b) {
-            miniArm.decrementalDrop();
-        }
-        if (gamePad1.y) {
-            miniArm.incrementalUp();
-        }
-        /*
-            gamePad 2 dpad up/down open/close claw incrementally
-        */
-        if (gamePad2.dpad_up) {
-            arm.lowerBucketIncrementally();
-        } else if (gamePad2.dpad_down) {
-            arm.raiseBucketIncrementally();
-        }
+
         if (secondaryOperationsCompleted()) {
             if (gamePad2.a) {
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Intake, "Assume Intake"));
@@ -401,15 +359,21 @@ public class Robot {
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Hang2, "Hang 2"));
             }
             //handle shoulder movement
-            if (Math.abs(gamePad2.left_stick_y) > 0.05) {
-                this.arm.setShoulderPower(gamePad2.left_stick_y);
+            if (Math.abs(gamePad2.left_stick_y) > 0.1) {
+                if (gamePad2.dpad_up) {
+                    this.arm.setWristPower(gamePad2.left_stick_y);
+                }
+                else {
+                    this.arm.setShoulderPower(gamePad2.left_stick_y);
+                }
             } else {
                 this.arm.retainShoulder();
+                this.arm.retainWrist();
             }
-            if (Math.abs(gamePad2.right_stick_y) > 0.05) {
-                this.arm.setElbowPower(Math.pow(gamePad2.right_stick_y, 7));
+            if (Math.abs(gamePad2.right_stick_y) > 0.1) {
+                this.arm.setSlidePower(Math.pow(gamePad2.right_stick_y, 7));
             } else {
-                this.arm.retainElbow();
+                this.arm.retainSlide();
             }
         }
     }
@@ -449,20 +413,12 @@ public class Robot {
         return this.arm;
     }
 
-    public MiniArm getMiniArm() {
-        return this.miniArm;
-    }
-
     public SilverTitansVisionPortal getVisionPortal() {
         return visionPortal;
     }
 
     public Field.SpikePosition getSpikePosition() {
         return visionPortal.getSpikePosition();
-    }
-
-    public String getMiniArmStatus() {
-        return miniArm.getStatus();
     }
 
     public LED getLed() {
