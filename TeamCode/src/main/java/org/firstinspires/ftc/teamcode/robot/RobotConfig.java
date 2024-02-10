@@ -18,7 +18,7 @@
     public static final String WRIST = "wrist";
     public static final String SHOULDER_LIMIT_SWITCH = "shoulderLimitSwitch";
     public static final String SLIDE_LIMIT_SWITCH = "slideLimitSwitch";
-
+    public static final String Pixel_Releaser = "pixelReleaser";
     public static final String DRONE_LAUNCHER = "droneLauncher";
     public static final String DRONE_HOLDER = "droneHolder";
 
@@ -62,39 +62,42 @@
     public static final int SHOULDER_INTERIM_TRAVEL_POSITION = 0;
     public static final int SHOULDER_DEPOSIT_POSITION = 1630;
     public static final int SLIDE_STARTING_POSITION = 0;
-    public static final int SLIDE_INTAKE_POSITION = -1920;
+    public static final int SLIDE_INTAKE_POSITION = 0;
     public static final int SLIDE_TRAVEL_POSITION = -1646;
     public static final int SLIDE_INTERIM_TRAVEL_POSITION = -1646;
     public static final int SLIDE_INTERIM_DEPOSIT_POSITION = -1400;
     public static final int SLIDE_DEPOSIT_POSITION = -2365;
     public static final int SLIDE_AUTO_DEPOSIT_POSITION = -1800;
 
+    public static final double RELEASER_RETAIN_POSITION = .5;
+    public static final double RELEASER_RELEASE_POSITION = .75;
+
 
 
     public static final ArmPosition ARM_STARTING_POSITION = new ArmPosition(
-            SHOULDER_STARTING_POSITION,
-            SLIDE_STARTING_POSITION,
-            WRIST_STARTING_POSITION);
+            0,
+            0,
+            0);
     public static final ArmPosition ARM_INTAKE_POSITION = new ArmPosition(
-            SHOULDER_INTAKE_POSITION,
+            0,
             SLIDE_INTAKE_POSITION,
-            WRIST_INTAKE_POSITION);
+            RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_1 = new ArmPosition(
-            630,
+            0,
             -1372,
-            0);
+            RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_2 = new ArmPosition(
-            1230,
+            0,
             -1677,
-            0);
+            RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_3 = new ArmPosition(
-            SHOULDER_DEPOSIT_POSITION,
+            0,
             SLIDE_DEPOSIT_POSITION,
-            WRIST_DEPOSIT_POSITION_3);
+            RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_TRAVEL_POSITION = new ArmPosition(
-            140,
             SLIDE_TRAVEL_POSITION,
-            WRIST_TRAVEL_POSITION);
+            WRIST_TRAVEL_POSITION,
+            RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_RAISED_POSITION = new ArmPosition(
             140,
             -620,

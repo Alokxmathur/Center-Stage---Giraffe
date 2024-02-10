@@ -1,20 +1,21 @@
 package org.firstinspires.ftc.teamcode.robot.components;
 
 public class ArmPosition {
-    public int getShoulder() {
-        return shoulder;
+    public double getPixelReleaser() {
+        return pixelReleaser;
     }
 
     public int getSlide() {
         return slide;
     }
 
-    int shoulder, slide, wrist;
+    int slide, wrist;
+    double pixelReleaser;
 
-    public ArmPosition(int shoulder, int slide, int wrist) {
-        this.shoulder = shoulder;
+    public ArmPosition(int slide, int wrist, double pixelReleaserPosition) {
         this.slide = slide;
         this.wrist = wrist;
+        this.pixelReleaser = pixelReleaserPosition;
     }
 
     public int getWrist() {

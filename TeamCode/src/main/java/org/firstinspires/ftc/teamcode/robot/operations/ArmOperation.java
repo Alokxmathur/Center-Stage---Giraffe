@@ -26,7 +26,7 @@ public class ArmOperation extends Operation {
     public enum Type {
         Intake, Raised, Travel, InterimTravel, Travel_From_Deposit, Deposit1, Deposit2, Deposit3, AutoDeposit,
         PreHang, Hang1, Hang2,
-        Eat, ThrowUp, Expel, Abstain
+        Eat, ThrowUp, Release, Abstain
     }
     Arm arm;
     Type type;
@@ -59,7 +59,7 @@ public class ArmOperation extends Operation {
             {
                 return arm.isWithinRange();
             }
-            case Expel: {
+            case Release: {
                 return arm.intakeWithinRange();
             }
             default: return true;
@@ -96,8 +96,8 @@ public class ArmOperation extends Operation {
                 arm.throwUp();
                 break;
             }
-            case Expel: {
-                arm.expel();
+            case Release: {
+                arm.release();
                 break;
             }
         }

@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.robot.RobotConfig;
 import org.firstinspires.ftc.teamcode.robot.operations.ArmOperation;
@@ -15,7 +16,10 @@ public class Arm {
     public static final int CORE_HEX_MOTOR_COUNT_PER_REV = 288;
     public static final int INOUT_GEAR_RATIO = 3;
 
-    DcMotorEx shoulder, slide, inOutMotor, wrist;
+    DcMotorEx slide, inOutMotor, wrist;
+
+    Servo pixelReleaser;
+
     DigitalChannel shoulderLimitSwitch, slideLimitSwitch;
     boolean shoulderRetained,
             slideRetained,
@@ -26,15 +30,6 @@ public class Arm {
             slideLowered;
 
     public Arm(HardwareMap hardwareMap) {
-        //the shoulder limit switch
-        this.shoulderLimitSwitch = hardwareMap.get(DigitalChannel.class, RobotConfig.SHOULDER_LIMIT_SWITCH);
-        //the slide limit switch
-        //initialize our shoulder motor
-        this.shoulder = hardwareMap.get(DcMotorEx.class, RobotConfig.SHOULDER);
-        this.shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        this.shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
         this.slideLimitSwitch = hardwareMap.get(DigitalChannel.class, RobotConfig.SLIDE_LIMIT_SWITCH);
         //initialize our slide motor
         this.slide = hardwareMap.get(DcMotorEx.class, RobotConfig.SLIDE);
@@ -54,6 +49,7 @@ public class Arm {
         this.wrist.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         this.wrist.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        this.pixelReleaser = hardwareMap.get(Servo.class, RobotConfig.Pixel_Releaser);
         ensureMotorDirections();
         assumeInitialPosition();
     }
@@ -79,34 +75,6 @@ public class Arm {
         return true;
 
          */
-    }
-
-    private boolean lowerThenRaiseShoulder() {
-        //if the shoulder limit switch has not yet been pressed
-        if (!shoulderLowered) {
-            //find the state of the shoulder limit switch: true means it is pressed
-            if (!(shoulderLowered = shoulderLimitSwitch.getState())) {
-                setShoulderPower(-.2);
-            }
-            else {
-                setShoulderPower(0);
-            }
-            return false;
-        }
-        else if (!shoulderReset) {
-            //if the shoulder had been lowered but not raised since,
-            //find if the limit switch has been raised since it was pressed
-            if (!(shoulderReset = !shoulderLimitSwitch.getState())) {
-                setShoulderPower(.1);
-                return false;
-            }
-            else {
-                //the limit switch is now not pressed, we are done. reset encoder and return true
-                this.shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                return true;
-            }
-        }
-        return true;
     }
     private boolean lowerThenRaiseSlide() {
         //if the slide limit switch has not yet been pressed
@@ -140,7 +108,6 @@ public class Arm {
 
     public void ensureMotorDirections() {
         this.slide.setDirection(DcMotorSimple.Direction.FORWARD);
-        this.shoulder.setDirection(DcMotorSimple.Direction.FORWARD);
         this.inOutMotor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
@@ -223,38 +190,8 @@ public class Arm {
 
     private void setPositions(ArmPosition armPosition) {
         setSlidePosition(armPosition.getSlide());
-        setShoulderPosition(armPosition.getShoulder());
         setWristPosition(armPosition.getWrist());
-    }
-
-    /**
-     * Set the shoulder motor position
-     * @param position
-     */
-    public void setShoulderPosition(int position) {
-        this.shoulder.setTargetPosition(position);
-        this.shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.shoulder.setPower(RobotConfig.MAX_SHOULDER_POWER);
-    }
-
-    /**
-     * Retain shoulder in its current position
-     */
-    public void retainShoulder() {
-        if (!shoulderRetained) {
-            setShoulderPosition(shoulder.getCurrentPosition());
-            shoulderRetained = true;
-        }
-    }
-
-    /**
-     * Set the shoulder power
-     * @param power
-     */
-    public void setShoulderPower(double power) {
-        this.shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.shoulder.setPower(power*RobotConfig.MAX_SHOULDER_POWER);
-        shoulderRetained = false;
+        pixelReleaser.setPosition(armPosition.getPixelReleaser());
     }
 
     /**
@@ -331,11 +268,7 @@ public class Arm {
      * @return
      */
     public boolean isWithinRange() {
-        return shoulderIsWithinRange() && slideIsWithinRange();
-    }
-
-    private boolean shoulderIsWithinRange() {
-        return Math.abs(shoulder.getTargetPosition() - shoulder.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_SHOULDER_ERROR;
+        return slideIsWithinRange();
     }
 
     private boolean slideIsWithinRange() {
@@ -347,26 +280,33 @@ public class Arm {
     }
 
     public void eat() {
+        //Set position of releaser so pixels can NOT come out of the rear of the intake
+        this.pixelReleaser.setPosition(RobotConfig.RELEASER_RELEASE_POSITION);
+        //set power of intake so it rotates at full speed to bring pixels in
         this.setInOutPower(1);
     }
     public void abstain() {
+        //Set position of releaser so pixels can NOT come out of the rear of the intake
+        this.pixelReleaser.setPosition(RobotConfig.RELEASER_RELEASE_POSITION);
         this.inOutMotor.setTargetPosition(
                 this.inOutMotor.getCurrentPosition());
         this.inOutMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.inOutMotor.setPower(1);
     }
     public void throwUp() {
-        expel();
-        //this.setInOutPower(-.3);
+        this.setInOutPower(-.3);
     }
-    public void expel() {
+    public void release() {
+        //Set position of releaser so pixel can come out of the rear of the intake
+        this.pixelReleaser.setPosition(RobotConfig.RELEASER_RELEASE_POSITION);
+        //rotate intake in manner tha pushes pixels towards the rear of the receptacle
+        //so they can come out on the other side of the intake
         this.inOutMotor.setTargetPosition(
                 this.inOutMotor.getCurrentPosition()
-                        - (int) (CORE_HEX_MOTOR_COUNT_PER_REV/INOUT_GEAR_RATIO*2));
+                        + (int) (CORE_HEX_MOTOR_COUNT_PER_REV/INOUT_GEAR_RATIO*2));
         this.inOutMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.inOutMotor.setPower(.5);
     }
-
     /**
      * Returns the status of the arm
      * Reports the current position, target position and power of the shoulder,
@@ -383,14 +323,28 @@ public class Arm {
 
 
         return String.format(Locale.getDefault(),
-                "Sh:%d->%d@%.2f, Slide:%d->%d@%.2f, Wrist:%d->%d@%.2f, In:%d->%d@%.2f",
-                shoulder.getCurrentPosition(), shoulder.getTargetPosition(), shoulder.getPower(),
+                "Slide:%d->%d@%.2f, Wrist:%d->%d@%.2f, In:%d->%d@%.2f, Rel:%.3f",
                 slide.getCurrentPosition(), slide.getTargetPosition(), slide.getPower(),
                 wrist.getCurrentPosition(), wrist.getTargetPosition(), wrist.getPower(),
-                inOutMotor.getCurrentPosition(), inOutMotor.getTargetPosition(), inOutMotor.getPower());
+                inOutMotor.getCurrentPosition(), inOutMotor.getTargetPosition(), inOutMotor.getPower(),
+                pixelReleaser.getPosition());
     }
 
     public boolean intakeWithinRange() {
         return Math.abs(inOutMotor.getTargetPosition() - inOutMotor.getCurrentPosition()) < 5;
+    }
+
+    public void pixelReleasePosition() {
+        this.pixelReleaser.setPosition(RobotConfig.RELEASER_RELEASE_POSITION);
+    }
+    public void pixelRetainPosition() {
+        this.pixelReleaser.setPosition(RobotConfig.RELEASER_RETAIN_POSITION);
+    }
+
+    public void incrementReleaserPosition() {
+        this.pixelReleaser.setPosition(this.pixelReleaser.getPosition() + RobotConfig.SERVO_INCREMENT);
+    }
+    public void decrementReleaserPosition() {
+        this.pixelReleaser.setPosition(this.pixelReleaser.getPosition() - RobotConfig.SERVO_INCREMENT);
     }
 }

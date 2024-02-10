@@ -327,7 +327,7 @@ public class Robot {
         }
         //If gamePad2 right trigger is pressed, start spitting out pixels
         else if (gamePad2.right_trigger > .2) {
-            arm.expel();
+            arm.release();
         }
 
         if (secondaryOperationsCompleted()) {
@@ -358,22 +358,33 @@ public class Robot {
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Hang1, "Hang 1"));
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Hang2, "Hang 2"));
             }
-            //handle shoulder movement
+
+            //handle slide movement
             if (Math.abs(gamePad2.left_stick_y) > 0.1) {
-                if (gamePad2.dpad_up) {
-                    this.arm.setWristPower(gamePad2.left_stick_y);
-                }
-                else {
-                    this.arm.setShoulderPower(gamePad2.left_stick_y);
-                }
-            } else {
-                this.arm.retainShoulder();
-                this.arm.retainWrist();
-            }
-            if (Math.abs(gamePad2.right_stick_y) > 0.1) {
-                this.arm.setSlidePower(Math.pow(gamePad2.right_stick_y, 7));
+                    this.arm.setSlidePower(gamePad2.left_stick_y);
             } else {
                 this.arm.retainSlide();
+            }
+
+            //handle wrist movement
+            if (Math.abs(gamePad2.right_stick_y) > 0.1) {
+                this.arm.setWristPower(gamePad2.right_stick_y);
+            } else {
+                this.arm.retainWrist();
+            }
+
+            //handle releaser
+            if (gamePad2.dpad_up) {
+                arm.incrementReleaserPosition();
+            }
+            if (gamePad2.dpad_down) {
+                arm.decrementReleaserPosition();
+            }
+            if (gamePad2.dpad_left) {
+                arm.pixelRetainPosition();
+            }
+            if (gamePad2.dpad_right) {
+                arm.pixelReleasePosition();
             }
         }
     }
