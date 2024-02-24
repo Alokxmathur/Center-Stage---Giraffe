@@ -79,16 +79,16 @@
             0,
             0);
     public static final ArmPosition ARM_INTAKE_POSITION = new ArmPosition(
-            0,
-            SLIDE_INTAKE_POSITION,
+            50,
+            -18,
             RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_1 = new ArmPosition(
-            0,
-            -1372,
+            -300,
+            321,
             RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_2 = new ArmPosition(
-            0,
-            -1677,
+            -1467,
+            295,
             RELEASER_RETAIN_POSITION);
     public static final ArmPosition ARM_DEPOSIT_POSITION_3 = new ArmPosition(
             0,
