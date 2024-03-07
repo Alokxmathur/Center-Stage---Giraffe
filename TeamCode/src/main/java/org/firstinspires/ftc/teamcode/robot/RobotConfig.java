@@ -127,6 +127,6 @@
             -50,
             0);
 
-    public static final int X_PIXEL_COUNT = 19090;
-    public static final int Y_PIXEL_COUNT = 1080;
+    public static final int X_PIXEL_COUNT = 1280;
+    public static final int Y_PIXEL_COUNT = 720;
  }

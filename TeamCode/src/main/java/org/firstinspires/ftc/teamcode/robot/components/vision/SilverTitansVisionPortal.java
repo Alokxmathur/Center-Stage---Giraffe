@@ -32,7 +32,7 @@ public class SilverTitansVisionPortal {
         this.objectDetectionVisionProcessor = new ObjectDetectionVisionProcessor();
         visionPortal = new org.firstinspires.ftc.vision.VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, RobotConfig.WEBCAM_ID))
-                //.setCameraResolution(new android.util.Size(RobotConfig.X_PIXEL_COUNT, RobotConfig.Y_PIXEL_COUNT))
+                .setCameraResolution(new android.util.Size(RobotConfig.X_PIXEL_COUNT, RobotConfig.Y_PIXEL_COUNT))
                 .addProcessors(objectDetectionVisionProcessor, aprilTagProcessor)
                 .build();
     }
