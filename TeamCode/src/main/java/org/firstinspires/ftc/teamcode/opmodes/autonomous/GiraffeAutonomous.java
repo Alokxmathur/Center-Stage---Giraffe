@@ -27,30 +27,18 @@ public abstract class GiraffeAutonomous extends AutonomousHelper {
     @Override
     public void start() {
         super.start();
+        double DISTANCE_TO_MIDDLE_OF_SPIKES = 24.0 * Field.MM_PER_INCH;
+        State state = new State("challenge");
+        new DriveInDirectionOperation(DISTANCE_TO_MIDDLE_OF_SPIKES, 0, RobotConfig.CAUTIOUS_SPEED, "Leave wall"));
+        state.addPrimaryOperation(new DriveInDirectionOperation(6   * Field.MM_PER_INCH,0, .5, "Straight 1"));
+        state.addPrimaryOperation(new BearingOperation(Math.toRadians(90), robot.getDriveTrain(), "1Left"));
+        state.addPrimaryOperation(new DriveInDirectionOperation(6   * Field.MM_PER_INCH,Math.toRadians(90), .5, "Straight 2"));
+        state.addPrimaryOperation(new BearingOperation(Math.toRadians(180), robot.getDriveTrain(), "2Left"));
+        state.addPrimaryOperation(new DriveInDirectionOperation(6 * Field.MM_PER_INCH,Math.toRadians(180), .5, "Straight 3"));
+        state.addPrimaryOperation(new BearingOperation(Math.toRadians(270), robot.getDriveTrain(), "3Left"));
+        state.addPrimaryOperation(new DriveInDirectionOperation(6 * Field.MM_PER_INCH,Math.toRadians(270), .5, "Straight 4"));
+        state.addPrimaryOperation(new BearingOperation(Math.toRadians(0), robot.getDriveTrain(), "4Left"));
 
-        State state = new State("Navigate");
-
-        state.addPrimaryOperation(
-                new DriveInDirectionOperation((DISTANCE_TO_CENTER+5), 0, RobotConfig.CAUTIOUS_SPEED, "Push Center"));
-        state.addPrimaryOperation(
-                new DriveInDirectionOperation((-5), 0, RobotConfig.CAUTIOUS_SPEED, "Back To Center"));
-        state.addPrimaryOperation(
-                new StrafeRightForDistanceOperation(DISTANCE_TO_STRAFE_RIGHT_PUSH, RobotConfig.CAUTIOUS_SPEED, "Push Right"));
-        state.addPrimaryOperation(
-                new StrafeRightForDistanceOperation(-2*DISTANCE_TO_STRAFE_RIGHT_PUSH, RobotConfig.CAUTIOUS_SPEED, "Push Left"));
-        state.addPrimaryOperation(
-                new StrafeRightForDistanceOperation(-DISTANCE_TO_STRAFE_RIGHT_PUSH, RobotConfig.CAUTIOUS_SPEED, "Back To Center Two"));
-        state.addPrimaryOperation(
-                new DriveInDirectionOperation((-DISTANCE_TO_CENTER), 0, RobotConfig.CAUTIOUS_SPEED, "Back To Wall"));
-
-        state.addPrimaryOperation(
-                new DriveInDirectionOperation(DISTANCE_TO_LEAVE_WALL, 0, RobotConfig.CAUTIOUS_SPEED, "Leave wall"));
-        if (match.getAlliance() == Alliance.Color.RED) {
-            state.addPrimaryOperation(new StrafeRightForDistanceOperation(DISTANCE_TO_STRAFE, RobotConfig.CAUTIOUS_SPEED, "Reach backdrop"));
-        }
-        else {
-            state.addPrimaryOperation(new StrafeLeftForDistanceOperation(DISTANCE_TO_STRAFE, RobotConfig.CAUTIOUS_SPEED, "Reach backdrop"));
-        }
         states.add(state);
 
         Match.log("Created and added state");
