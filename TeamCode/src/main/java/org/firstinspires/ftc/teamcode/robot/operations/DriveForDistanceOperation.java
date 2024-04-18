@@ -13,7 +13,7 @@ public class DriveForDistanceOperation extends DriveTrainOperation {
     protected double speed;
 
     /**
-     * Drive forward for the distance specified at the speed specfied
+     * Drive forward for the distance specified at the speed specified
      * @param distance - distance to travel in mms
      * @param speed -1 to 1
      * @param title

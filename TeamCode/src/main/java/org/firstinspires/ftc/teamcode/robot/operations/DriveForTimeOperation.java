@@ -22,7 +22,7 @@ public class DriveForTimeOperation extends DriveTrainOperation {
 
     /**
      * Drive for the specified time
-     * @param time
+     * @param time - the number of milliseconds
      * @param heading - the heading relative to the robot in radians
      *                This is not the field heading
      * @param speed

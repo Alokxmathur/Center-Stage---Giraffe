@@ -14,6 +14,7 @@ import org.firstinspires.ftc.teamcode.robot.operations.BearingOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveForDistanceOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveToPositionOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.FollowTrajectory;
+import org.firstinspires.ftc.teamcode.robot.operations.SlopingTurnForTimeOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.StrafeLeftForDistanceOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.StrafeLeftForDistanceWithHeadingOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.StrafeRightForDistanceOperation;
@@ -168,6 +169,19 @@ public class DriveTrain extends SilverTitansMecanumDrive {
     }
 
     /**
+     * Handle a sloping turn operation by setting the speeds of the left and right motors to
+     * the specified values
+     * @param operation
+     */
+    public void handleOperation(SlopingTurnForTimeOperation operation) {
+        stop();
+
+        this.leftFront.setPower(operation.getLeftSpeed());
+        this.rightFront.setPower(operation.getRightSpeed());
+        this.leftRear.setPower(operation.getLeftSpeed());
+        this.rightRear.setPower(operation.getRightSpeed());
+    }
+    /**
      * Handle operation to turn clockwise for the specified distance
      * @param operation
      *
@@ -179,18 +193,18 @@ public class DriveTrain extends SilverTitansMecanumDrive {
         stop();
 
         int encoderChange = SilverTitansDriveConstants.mmToEncoderTicks(operation.getDistance());
-        this.rightFront.setTargetPosition(leftFront.getCurrentPosition() + encoderChange/2);
-        this.rightRear.setTargetPosition(rightRear.getCurrentPosition() + encoderChange/2);
+        this.rightFront.setTargetPosition(rightFront.getCurrentPosition() - encoderChange);
+        this.rightRear.setTargetPosition(rightRear.getCurrentPosition() - encoderChange);
         this.leftFront.setTargetPosition(leftFront.getCurrentPosition() + encoderChange);
-        this.leftRear.setTargetPosition(rightRear.getCurrentPosition() + encoderChange);
+        this.leftRear.setTargetPosition(leftRear.getCurrentPosition() + encoderChange);
 
         this.rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.leftFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.leftRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        this.rightFront.setPower(operation.getSpeed()/2);
-        this.rightRear.setPower(operation.getSpeed()/2);
+        this.rightFront.setPower(operation.getSpeed());
+        this.rightRear.setPower(operation.getSpeed());
         this.leftFront.setPower(operation.getSpeed());
         this.leftRear.setPower(operation.getSpeed());
     }
@@ -208,10 +222,10 @@ public class DriveTrain extends SilverTitansMecanumDrive {
         stop();
 
         int encoderChange = SilverTitansDriveConstants.mmToEncoderTicks(operation.getDistance());
-        this.rightFront.setTargetPosition(leftFront.getCurrentPosition() + encoderChange);
+        this.rightFront.setTargetPosition(rightFront.getCurrentPosition() + encoderChange);
         this.rightRear.setTargetPosition(rightRear.getCurrentPosition() + encoderChange);
-        this.leftFront.setTargetPosition(leftFront.getCurrentPosition() + encoderChange/2);
-        this.leftRear.setTargetPosition(rightRear.getCurrentPosition() + encoderChange/2);
+        this.leftFront.setTargetPosition(leftFront.getCurrentPosition() - encoderChange);
+        this.leftRear.setTargetPosition(leftRear.getCurrentPosition() - encoderChange);
 
         this.rightFront.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         this.rightRear.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -220,8 +234,8 @@ public class DriveTrain extends SilverTitansMecanumDrive {
 
         this.rightFront.setPower(operation.getSpeed());
         this.rightRear.setPower(operation.getSpeed());
-        this.leftFront.setPower(operation.getSpeed()/2);
-        this.leftRear.setPower(operation.getSpeed()/2);
+        this.leftFront.setPower(operation.getSpeed());
+        this.leftRear.setPower(operation.getSpeed());
     }
 
     /**

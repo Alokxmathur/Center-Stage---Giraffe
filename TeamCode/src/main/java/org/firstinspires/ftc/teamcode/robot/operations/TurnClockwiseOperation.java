@@ -5,7 +5,7 @@ import org.firstinspires.ftc.teamcode.game.Field;
 import java.util.Locale;
 
 /**
- * Created by Silver Titans on 10/12/17.
+ * Turns clockwise the .
  */
 
 public class TurnClockwiseOperation extends DriveForDistanceOperation {
