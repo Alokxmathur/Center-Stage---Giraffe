@@ -12,12 +12,12 @@ import org.firstinspires.ftc.teamcode.game.Alliance;
 import org.firstinspires.ftc.teamcode.game.Field;
 import org.firstinspires.ftc.teamcode.game.Match;
 import org.firstinspires.ftc.teamcode.robot.components.Arm;
-import org.firstinspires.ftc.teamcode.robot.components.DroneLauncher;
+import org.firstinspires.ftc.teamcode.robot.components.Intake;
 import org.firstinspires.ftc.teamcode.robot.components.LED;
 import org.firstinspires.ftc.teamcode.robot.components.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.robot.components.vision.SilverTitansVisionPortal;
-import org.firstinspires.ftc.teamcode.robot.operations.ArmOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveToAprilTag;
+import org.firstinspires.ftc.teamcode.robot.operations.IntakeOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.Operation;
 import org.firstinspires.ftc.teamcode.robot.operations.OperationThread;
 
@@ -87,10 +87,8 @@ public class Robot {
     DriveTrain driveTrain;
     LED led;
     Arm arm;
-    DroneLauncher droneLauncher;
+    Intake intake;
     SilverTitansVisionPortal visionPortal;
-
-    boolean armInitialized;
 
     //Our sensors etc.
 
@@ -121,9 +119,8 @@ public class Robot {
             this.led.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
         }
 
-        this.droneLauncher = new DroneLauncher(hardwareMap);
-
         this.arm = new Arm(hardwareMap);
+        this.intake = new Intake(hardwareMap);
 
         telemetry.addData("Status", "Creating operations thread, please wait");
         telemetry.update();
@@ -151,14 +148,6 @@ public class Robot {
         telemetry.update();
         this.visionPortal = new SilverTitansVisionPortal();
         this.visionPortal.init(hardwareMap);
-    }
-
-    /**
-     * This method initializes the elbow and then the shoulder by using the limit switches
-     * It should be called repeatedly from the init_loop of autonomous modes until it is done
-     */
-    public void resetArm() {
-        armInitialized = this.arm.resetArm();
     }
 
     /**
@@ -228,7 +217,7 @@ public class Robot {
     }
 
     public boolean fullyInitialized() {
-        return armInitialized;
+        return true;
     }
 
     /*
@@ -244,19 +233,6 @@ public class Robot {
 
         this.handleDriveTrain(gamePad1);
         handleArm(gamePad1, gamePad2);
-
-        if (gamePad2.right_bumper) {
-            droneLauncher.launchDrone();
-        }
-        else if (gamePad2.left_bumper) {
-            droneLauncher.holdDrone();
-        }
-        if (gamePad1.left_bumper) {
-            droneLauncher.releaseHold();
-        }
-        if (gamePad1.right_bumper) {
-            droneLauncher.launchDrone();
-        }
     }
 
     /**
@@ -301,7 +277,7 @@ public class Robot {
                 //regular driving
                 double multiplier = gamePad1.right_trigger > 0.1 ? .6 : (gamePad1.left_trigger > 0.1 ? 1 : .3);
                 double x = Math.pow(gamePad1.left_stick_x, 7) * multiplier; // Get left joystick's x-axis value.
-                double y = -Math.pow(gamePad1.left_stick_y, 5) * multiplier; // Get left joystick's y-axis value.
+                double y = -Math.pow(gamePad1.left_stick_y, 7) * multiplier; // Get left joystick's y-axis value.
 
                 double rotation = Math.pow(gamePad1.right_stick_x, 5) * multiplier; // Get right joystick's x-axis value for rotation
 
@@ -319,26 +295,26 @@ public class Robot {
 
         //If both gamePad2 left and right trigger are pressed, stop inout motor
         if (gamePad2.left_trigger > .2 && gamePad2.right_trigger > .2) {
-            arm.abstain();
+            intake.abstain();
         }
-        //If gamePad2 left trigger is pressed, start consuming pixels
+        //If gamePad2 left trigger is pressed, start consuming samples
         else if (gamePad2.left_trigger > .2) {
-            arm.eat();
+            intake.eat();
         }
-        //If gamePad2 right trigger is pressed, start spitting out pixels
+        //If gamePad2 right trigger is pressed, start spitting out samples
         else if (gamePad2.right_trigger > .2) {
-            arm.release();
+            intake.release();
         }
 
         if (secondaryOperationsCompleted()) {
             if (gamePad2.a) {
-                queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Intake, "Assume Intake"));
-                queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Eat, "Start intake"));
+                queueSecondaryOperation(new IntakeOperation(IntakeOperation.Type.Lower_Intake, "Assume Intake"));
+                queueSecondaryOperation(new IntakeOperation(IntakeOperation.Type.Eat, "Start intake"));
             }
             if (gamePad2.b) {
-                queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Abstain, "Stop intake"));
-                queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Travel, "Travel Position"));
+                 queueSecondaryOperation(new IntakeOperation(IntakeOperation.Type.Raise_Intake, "Raise Intake"));
             }
+            /*
             if (gamePad2.y) {
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Abstain, "Stop intake"));
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Deposit1, "Low deposit position"));
@@ -359,6 +335,8 @@ public class Robot {
                 queueSecondaryOperation(new ArmOperation(ArmOperation.Type.Hang2, "Hang 2"));
             }
 
+             */
+
             //handle slide movement
             if (Math.abs(gamePad2.left_stick_y) > 0.1) {
                     this.arm.setSlidePower(gamePad2.left_stick_y);
@@ -366,11 +344,11 @@ public class Robot {
                 this.arm.retainSlide();
             }
 
-            //handle wrist movement
+            //handle elbow movement
             if (Math.abs(gamePad2.right_stick_y) > 0.1) {
-                this.arm.setWristPower(gamePad2.right_stick_y);
+                this.arm.setElbowPower(gamePad2.right_stick_y);
             } else {
-                this.arm.retainWrist();
+                this.arm.retainElbow();
             }
 
             //handle releaser
@@ -381,10 +359,10 @@ public class Robot {
                 arm.decrementReleaserPosition();
             }
             if (gamePad2.dpad_left) {
-                arm.pixelRetainPosition();
+                arm.clawRetainPosition();
             }
             if (gamePad2.dpad_right) {
-                arm.pixelReleasePosition();
+                arm.clawReleasePosition();
             }
         }
     }
@@ -419,9 +397,15 @@ public class Robot {
     public String getArmStatus() {
         return this.arm.getStatus();
     }
-
+    public String getIntakeStatus() {
+        return this.intake.getStatus();
+    }
     public Arm getArm() {
         return this.arm;
+    }
+
+    public Intake getIntake() {
+        return this.intake;
     }
 
     public SilverTitansVisionPortal getVisionPortal() {
@@ -436,7 +420,4 @@ public class Robot {
         return this.led;
     }
 
-    public String getLauncherStatus() {
-        return this.droneLauncher.getStatus();
-    }
 }

@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.robot.operations;
 
 import org.firstinspires.ftc.teamcode.game.Match;
 import org.firstinspires.ftc.teamcode.robot.components.Arm;
+import org.firstinspires.ftc.teamcode.robot.components.Intake;
 
 import java.util.Locale;
 
@@ -21,16 +22,16 @@ import java.util.Locale;
  *  Stack2 - get claw to level to pickup the 2'nd cone in the stack
  *  Stack1 - get claw to level to pickup the bottom cone in the stack - same as ground
  */
-public class ArmOperation extends Operation {
+public class IntakeOperation extends Operation {
 
     public enum Type {
-        Initial, Lower_Basket, Higher_Basket
+        Eat, Abstain, Release, Lower_Intake, Raise_Intake
     }
-    Arm arm;
+    Intake intake;
     Type type;
 
-    public ArmOperation(Type type, String title) {
-        this.arm = Match.getInstance().getRobot().getArm();
+    public IntakeOperation(Type type, String title) {
+        this.intake = Match.getInstance().getRobot().getIntake();
         this.type = type;
         this.title = title;
     }
@@ -42,24 +43,29 @@ public class ArmOperation extends Operation {
 
     public boolean isComplete() {
 
-        switch (this.type) {
-            case Initial:
-            case Lower_Basket:
-            case Higher_Basket:
-            {
-                return arm.isWithinRange();
-            }
-            default: return true;
-        }
+       return intake.intakeWithinRange();
     }
 
     @Override
     public void startOperation() {
         switch (this.type) {
-            case Initial:
-            case Lower_Basket:
-            case Higher_Basket: {
-                arm.setPositions(type);
+            case Eat: {
+                intake.eat();
+            }
+            case Abstain: {
+                intake.abstain();
+                break;
+            }
+            case Release: {
+                intake.release();
+                break;
+            }
+            case Lower_Intake: {
+                intake.lowerIntake();
+                break;
+            }
+            case Raise_Intake: {
+                intake.raiseIntake();
                 break;
             }
         }
@@ -67,6 +73,6 @@ public class ArmOperation extends Operation {
 
     @Override
     public void abortOperation() {
-        arm.stop();
+        intake.stop();
     }
 }

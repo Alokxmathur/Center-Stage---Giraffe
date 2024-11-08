@@ -25,7 +25,7 @@ public class PIDF_Wrist extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        wristMotor = hardwareMap.get(DcMotorEx.class, RobotConfig.WRIST);
+        wristMotor = hardwareMap.get(DcMotorEx.class, RobotConfig.ELBOW);
         // Get a reference to the motor controller and cast it as an extended functionality controller.
         motorControllerEx = (DcMotorControllerEx) wristMotor.getController();
         motorIndex = ((DcMotorEx) wristMotor).getPortNumber();

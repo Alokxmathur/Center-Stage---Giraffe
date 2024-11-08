@@ -434,6 +434,8 @@ public class DriveTrain extends SilverTitansMecanumDrive {
         setRightFrontPower(v2);
         setLeftRearPower(v3);
         setRightRearPower(v4);
+
+        Match.log(String.format(Locale.getDefault(), "Powers: LF:%.2f,RF:%.2f,LR:%.2f,RR:%.2f", v1, v2, v3, v4));
     }
 
 

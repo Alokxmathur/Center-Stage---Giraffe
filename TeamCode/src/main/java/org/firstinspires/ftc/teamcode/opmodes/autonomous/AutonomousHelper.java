@@ -72,7 +72,6 @@ public abstract class AutonomousHelper extends OpMode {
                 telemetry.addData("State", "Trajectories initializing, please wait. " +
                         (30 - (int) (new Date().getTime() - initStartTime.getTime()) / 1000));
             } else if (!robot.fullyInitialized()) {
-                robot.resetArm();
                 robot.getVisionPortal().enableObjectDetection(
                     match.getAlliance() == Alliance.Color.RED
                             ? ObjectDetector.ObjectType.RedProp

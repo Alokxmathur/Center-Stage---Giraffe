@@ -11,6 +11,7 @@ import org.firstinspires.ftc.teamcode.robot.operations.BearingOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveForDistanceOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveInDirectionOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.DriveToAprilTag;
+import org.firstinspires.ftc.teamcode.robot.operations.IntakeOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.LedOperation;
 import org.firstinspires.ftc.teamcode.robot.operations.State;
 import org.firstinspires.ftc.teamcode.robot.operations.StrafeLeftForDistanceOperation;
@@ -81,10 +82,7 @@ public abstract class Autonomous extends AutonomousHelper {
         State state = new State("Deliver Purple Pixel");
 
         //Turn on blue-violet pattern on the led to state we are trying to deposit the purple pixel
-        state.addTertiaryOperation(new LedOperation(robot.getLed(), RevBlinkinLedDriver.BlinkinPattern.BLUE_VIOLET, "Purple pixel mode"));
-        //raise the arm
-        state.addSecondaryOperation(new ArmOperation(ArmOperation.Type.Raised, "Get arm to raised level"));
-        //Move forward a little to clear the wall so we can rotate
+        state.addTertiaryOperation(new LedOperation(robot.getLed(), RevBlinkinLedDriver.BlinkinPattern.BLUE_VIOLET, "Purple pixel mode"));//Move forward a little to clear the wall so we can rotate
         state.addPrimaryOperation(
                 new DriveInDirectionOperation(DISTANCE_TO_MIDDLE_OF_SPIKES, 0, RobotConfig.CAUTIOUS_SPEED, "Leave wall"));
         //Turn so we can push the prop with the front of the robot
@@ -120,20 +118,17 @@ public abstract class Autonomous extends AutonomousHelper {
             //drive up to the proper April Tag and also lower arm to deposit yellow pixel
             state.addPrimaryOperation(new DriveToAprilTag(20 * Field.MM_PER_INCH, desiredAprilTagId, "Drive to April Tag"));
             //state.addPrimaryOperation(new StrafeRightForDistanceOperation(3*Field.MM_PER_INCH, RobotConfig.CAUTIOUS_SPEED, "Shift to line up pixel"));
-            state.addSecondaryOperation(new ArmOperation(ArmOperation.Type.AutoDeposit, "Get arm to auto-deposit level"));
             states.add(state);
 
             state = new State("Drop yellow pixel");
             //run into backdrop
             state.addPrimaryOperation(new DriveToAprilTag(11.5 * Field.MM_PER_INCH, desiredAprilTagId, "Drive to April Tag"));
             //push yellow pixel out
-            state.addPrimaryOperation(new ArmOperation(ArmOperation.Type.Release, "Expel pixel"));
             //state.addPrimaryOperation(new WaitOperation(3000, "wait three seconds"));
             states.add(state);
 
 
             state = new State("Navigate");
-            state.addSecondaryOperation(new ArmOperation(ArmOperation.Type.Abstain, "Stop in/out take"));
 
             state.addPrimaryOperation(new DriveForDistanceOperation(-10 * Field.MM_PER_INCH, RobotConfig.CAUTIOUS_SPEED, "Back Away"));
             if (match.getAlliance() == Alliance.Color.RED) {
@@ -178,12 +173,10 @@ public abstract class Autonomous extends AutonomousHelper {
             states.add(state);
 
             state = new State("Go under bridge");
-            state.addPrimaryOperation(new ArmOperation(ArmOperation.Type.Travel, "Lower arm to go under bridge"));
             state.addPrimaryOperation((new DriveInDirectionOperation(4*Field.TILE_WIDTH, bearingToBackdrop, RobotConfig.CAUTIOUS_SPEED, "Get near door")));
             states.add(state);
 
             state = new State("Strafe to see tags");
-            state.addPrimaryOperation(new ArmOperation(ArmOperation.Type.AutoDeposit, "Raise arm so we can see april tags"));
             if (match.getAlliance() == Alliance.Color.RED) {
                 state.addPrimaryOperation(
                         new StrafeRightToAprilTagOperation(
@@ -200,7 +193,7 @@ public abstract class Autonomous extends AutonomousHelper {
             state.addPrimaryOperation(new DriveToAprilTag(11.5 * Field.MM_PER_INCH, desiredAprilTagId,  "Drive to April Tag"));
             //state.addPrimaryOperation(new DriveForDistanceOperation(13*Field.MM_PER_INCH, RobotConfig.CAUTIOUS_SPEED, "Reach backdrop"));
             //push yellow pixel out
-            state.addPrimaryOperation(new ArmOperation(ArmOperation.Type.Release, "Expel pixel"));
+            state.addPrimaryOperation(new IntakeOperation(IntakeOperation.Type.Release, "Expel pixel"));
 
             states.add(state);
 

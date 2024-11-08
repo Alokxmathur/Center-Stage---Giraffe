@@ -10,13 +10,13 @@ public class LED {
     RevBlinkinLedDriver.BlinkinPattern pattern;
 
     public LED(HardwareMap hardwareMap) {
-        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, RobotConfig.BLINKIN);
+        //blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, RobotConfig.BLINKIN);
         stop();
     }
 
     public void setPattern(RevBlinkinLedDriver.BlinkinPattern pattern) {
         this.pattern = pattern;
-        this.blinkinLedDriver.setPattern(pattern);
+        //this.blinkinLedDriver.setPattern(pattern);
     }
 
     public RevBlinkinLedDriver.BlinkinPattern getPattern() {
@@ -24,7 +24,7 @@ public class LED {
     }
 
     public void stop() {
-        this.blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+        //this.blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
     }
 
 }
