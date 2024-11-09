@@ -15,7 +15,7 @@ public class Arm {
     public static final int CORE_HEX_MOTOR_COUNT_PER_REV = 288;
     public static final int INOUT_GEAR_RATIO = 3;
 
-    DcMotorEx slide, elbow;
+    DcMotorEx slide, shoulder;
 
     Servo claw;
 
@@ -31,10 +31,10 @@ public class Arm {
         this.slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         //initialize our wrist motor
-        this.elbow = hardwareMap.get(DcMotorEx.class, RobotConfig.ELBOW);
-        this.elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        this.elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.shoulder = hardwareMap.get(DcMotorEx.class, RobotConfig.SHOULDER);
+        this.shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        this.shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.shoulder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         this.claw = hardwareMap.get(Servo.class, RobotConfig.CLAW);
         ensureMotorDirections();
@@ -50,12 +50,12 @@ public class Arm {
         setPositions(RobotConfig.ARM_STARTING_POSITION);
     }
 
-    public void raiseElbowIncrementally() {
-        setElbowPosition(elbow.getCurrentPosition() - 5);
+    public void raiseShoulderIncrementally() {
+        setShoulderPosition(shoulder.getCurrentPosition() - 5);
     }
 
-    public void lowerElbowIncrementally() {
-        setElbowPosition(elbow.getCurrentPosition() + 5);
+    public void lowerShoulderIncrementally() {
+        setShoulderPosition(shoulder.getCurrentPosition() + 5);
     }
 
     public void stop() {
@@ -80,7 +80,7 @@ public class Arm {
 
     private void setPositions(ArmPosition armPosition) {
         setSlidePosition(armPosition.getSlide());
-        setElbowPosition(armPosition.getElbow());
+        setShoulderPosition(armPosition.getElbow());
         claw.setPosition(armPosition.getClaw());
     }
 
@@ -118,10 +118,10 @@ public class Arm {
      * Set the wrist motor position
      * @param position
      */
-    public void setElbowPosition(int position) {
-        this.elbow.setTargetPosition(position);
-        this.elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        this.elbow.setPower(RobotConfig.MAX_SHOULDER_POWER);
+    public void setShoulderPosition(int position) {
+        this.shoulder.setTargetPosition(position);
+        this.shoulder.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        this.shoulder.setPower(RobotConfig.MAX_SHOULDER_POWER);
     }
 
     /**
@@ -129,7 +129,7 @@ public class Arm {
      */
     public void retainElbow() {
         if (!elbowRetained) {
-            setElbowPosition(elbow.getCurrentPosition());
+            setShoulderPosition(shoulder.getCurrentPosition());
             elbowRetained = true;
         }
     }
@@ -139,8 +139,8 @@ public class Arm {
      * @param power
      */
     public void setElbowPower(double power) {
-        this.elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        this.elbow.setPower(power*RobotConfig.MAX_WRIST_POWER);
+        this.shoulder.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.shoulder.setPower(power*RobotConfig.MAX_WRIST_POWER);
         elbowRetained = false;
     }
 
@@ -157,7 +157,7 @@ public class Arm {
     }
 
     private boolean wristIsWithinRange() {
-        return Math.abs(elbow.getTargetPosition() - elbow.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_WRIST_ERROR;
+        return Math.abs(shoulder.getTargetPosition() - shoulder.getCurrentPosition()) <= RobotConfig.ACCEPTABLE_WRIST_ERROR;
     }
 
     public void release() {
@@ -181,7 +181,7 @@ public class Arm {
         return String.format(Locale.getDefault(),
                 "Slide:%d->%d@%.2f, Wrist:%d->%d@%.2f",
                 slide.getCurrentPosition(), slide.getTargetPosition(), slide.getPower(),
-                elbow.getCurrentPosition(), elbow.getTargetPosition(), elbow.getPower(),
+                shoulder.getCurrentPosition(), shoulder.getTargetPosition(), shoulder.getPower(),
                 claw.getPosition());
     }
 

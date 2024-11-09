@@ -15,7 +15,7 @@
     public static final String SLIDE = "slide";
     public static final String INTAKE_MOTOR = "intakeMotor";
     public static final String INTAKE_MOVER_MOTOR = "intakeMoverMotor";
-    public static final String ELBOW = "elbow";
+    public static final String SHOULDER = "elbow";
     public static final String CLAW = "claw";
 
     public static final double CLAW_RELEASE_POSITION = 0.5;
