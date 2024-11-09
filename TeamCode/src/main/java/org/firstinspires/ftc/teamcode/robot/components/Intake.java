@@ -40,7 +40,7 @@ public class Intake {
         this.intakeMotor.setPower(1);
     }
     public void release() {
-        this.setIntakePower(-.3);
+        this.setIntakePower(-1);
     }
     public void raiseIntake() {
 
