@@ -19,7 +19,7 @@ public class Arm {
 
     Servo claw;
 
-    boolean shoulderRetained,
+    boolean
             slideRetained,
             elbowRetained;
 
